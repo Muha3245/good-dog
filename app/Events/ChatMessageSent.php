@@ -8,6 +8,7 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class ChatMessageSent implements ShouldBroadcast
 {
@@ -18,6 +19,7 @@ class ChatMessageSent implements ShouldBroadcast
     public function __construct($message)
     {
         $this->message = $message;
+        Log::debug("message in ChatMessageSent event: ", $message->toArray());
     }
 
     
@@ -44,6 +46,9 @@ public function broadcastOn()
             'conversation_id' => $this->message->conversation_id,
             'sender_id' => $this->message->sender_id,
             'receiver_id' => $this->message->receiver_id,
+            'file_path' => $this->message->file_path,
+            'file_name' => $this->message->file_name,
+            'file_type' => $this->message->file_type,
             'message' => $this->message->message,
             'created_at' => $this->message->created_at->toDateTimeString(),
             'sender' => [

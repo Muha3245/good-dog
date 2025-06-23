@@ -11,7 +11,7 @@
         <div class="position-relative">
             <div class="scroll-slider d-flex flex-nowrap overflow-auto pb-4 pe-2">
                 @foreach (\App\Helpers\Helpers::getFilteredParents('cuddly') as $parent)
-                <div class="card me-4 flex-shrink-0 border-0 shadow-sm hover-card" style="width: 32%; min-width: 280px;">
+                <div class="card me-4 flex-shrink-0 border-0 shadow-sm hover-card" style="width: 30%; min-width: 300px;">
                     <a href="{{ route('parents.puppies', $parent->id) }}" class="text-decoration-none text-dark">
                         <div class="position-relative overflow-hidden rounded-top">
                             @if ($parent->cover_image)
@@ -42,7 +42,7 @@
         <div class="position-relative">
             <div class="scroll-slider d-flex flex-nowrap overflow-auto pb-4 pe-2">
                 @foreach (\App\Helpers\Helpers::getFilteredParents('family') as $parent)
-                <div class="card me-4 flex-shrink-0 border-0 shadow-sm hover-card" style="width: 32%; min-width: 280px;">
+                <div class="card me-4 flex-shrink-0 border-0 shadow-sm hover-card" style="width: 30%; min-width: 300px;">
                     <a href="{{ route('parents.puppies', $parent->id) }}" class="text-decoration-none text-dark">
                         <div class="position-relative overflow-hidden rounded-top">
                             @if ($parent->cover_image)
@@ -73,7 +73,7 @@
         <div class="position-relative">
             <div class="scroll-slider d-flex flex-nowrap overflow-auto pb-4 pe-2">
                 @foreach (\App\Helpers\Helpers::getFilteredParents('allergy') as $parent)
-                <div class="card me-4 flex-shrink-0 border-0 shadow-sm hover-card" style="width: 32%; min-width: 280px;">
+                <div class="card me-4 flex-shrink-0 border-0 shadow-sm hover-card" style="width: 30%; min-width: 300px;">
                     <a href="{{ route('parents.puppies', $parent->id) }}" class="text-decoration-none text-dark">
                         <div class="position-relative overflow-hidden rounded-top">
                             @if ($parent->cover_image)

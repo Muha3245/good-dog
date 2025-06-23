@@ -614,7 +614,7 @@
                                 <h3 class="puppy-name">{{ $puppy->name }}</h3>
                                 <p class="puppy-meta">{{ $puppy->breed }} • {{ $puppy->gender }} • {{ $puppy->age }}</p>
                                 <p class="puppy-price">${{ number_format($puppy->price) }}</p>
-                                <a href="{{ route('puppies.show', $puppy->id) }}" class="btn btn-primary w-100">View Details</a>
+                                <a href="{{ route('puppiesprofile.show', $puppy->id) }}" class="btn btn-primary w-100">View Details</a>
                             </div>
                         </div>
                     @endforeach
@@ -628,7 +628,7 @@
             </div>
         </div>
     </div>
-
+@include('footer')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
     <script>

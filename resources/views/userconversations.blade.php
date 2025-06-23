@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Conversations</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> 
     <style>
         :root {
             --light-bg: #ffffff;
@@ -17,7 +16,6 @@
             --card-bg: #ffffff;
             --unread-badge: #d32f2f;
         }
-        
         body {
             background-color: var(--light-bg);
             color: var(--dark-text);
@@ -25,44 +23,37 @@
             margin: 0;
             padding: 20px;
         }
-        
         .conversations-container {
             max-width: 1000px;
             margin: 0 auto;
         }
-        
         .header {
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 15px;
             border-bottom: 1px solid var(--red-accent);
         }
-        
         .header h1 {
             color: var(--red-accent);
             margin-bottom: 5px;
         }
-        
         .conversations-list {
             display: grid;
             gap: 20px;
         }
-        
         .conversation-card {
             background-color: var(--card-bg);
             border: 1px solid var(--gray-border);
             border-radius: 8px;
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
         .conversation-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(211, 47, 47, 0.1);
             border-left: 3px solid var(--red-accent);
         }
-        
         .conversation-header {
             background-color: var(--lighter-bg);
             padding: 15px 20px;
@@ -71,34 +62,29 @@
             justify-content: space-between;
             align-items: center;
         }
-        
         .conversation-id {
             color: var(--red-accent);
             font-weight: bold;
         }
-        
         .conversation-user {
             font-style: italic;
             color: var(--light-black);
+            position: relative;
         }
-        
         .conversation-body {
             padding: 20px;
         }
-        
         .detail-row {
             display: flex;
             margin-bottom: 10px;
             padding-bottom: 10px;
             border-bottom: 1px dashed var(--gray-border);
         }
-        
         .detail-label {
             color: var(--red-accent);
             font-weight: bold;
             width: 150px;
         }
-        
         .no-conversations {
             text-align: center;
             padding: 40px;
@@ -108,7 +94,6 @@
             border-radius: 8px;
             background-color: var(--lighter-bg);
         }
-        
         .unread-count {
             background-color: var(--unread-badge);
             color: white;
@@ -117,7 +102,6 @@
             font-size: 0.8rem;
             margin-left: 5px;
         }
-        
         .latest-message {
             color: var(--light-black);
             font-size: 0.9rem;
@@ -127,14 +111,13 @@
             border-radius: 4px;
             border-left: 3px solid var(--red-accent);
         }
-        
         .message-preview {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
     </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
     @vite(['resources/js/app.js'])
 </head>
 <body>
@@ -143,11 +126,13 @@
             <h1>Your Conversations</h1>
             <p style="color: var(--light-black);">All active conversations</p>
         </div>
-        
         <div class="conversations-list">
             @forelse($conversations as $conversation)
                 @php
-                    $unreadCount = auth()->user()->unreadMessagesFrom($conversation->user)->count();
+                    $unreadCount = auth()->user()->receivedMessages()
+                        ->where('conversation_id', $conversation->id)
+                        ->where('is_read', 0)
+                        ->count();
                     $latestMessage = $conversation->messages()->latest()->first();
                 @endphp
                 <div class="conversation-card" data-conversation-id="{{ $conversation->id }}">
@@ -156,8 +141,10 @@
                         <a href="{{ route('chat.show', ['conversation' => $conversation->id]) }}">
                             <span class="conversation-user">
                                 <i class="fas fa-comments me-2"></i>With: Admin
-                                @if($unreadCount > 0)
-                                    <span class="unread-count" id="unread-count-{{ $conversation->id }}">{{ $unreadCount }}</span>
+                                @if ($unreadCount > 0)
+                                    <span id="unread-count-{{ $conversation->id }}" class="unread-count">
+                                        {{ $unreadCount }}
+                                    </span>
                                 @endif
                             </span>
                         </a>
@@ -175,7 +162,7 @@
                             <span class="detail-label">Last Updated:</span>
                             <span id="last-updated-{{ $conversation->id }}">{{ $conversation->updated_at->diffForHumans() }}</span>
                         </div>
-                        @if($latestMessage)
+                        @if ($latestMessage)
                             <div class="latest-message" id="latest-message-{{ $conversation->id }}">
                                 <strong>Latest: </strong>
                                 <span class="message-preview">{{ Str::limit($latestMessage->content, 50) }}</span>
@@ -196,149 +183,127 @@
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const currentUserId = {{ auth()->id() }};
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentUserId = {{ auth()->id() }};
+            console.log('Echo instance:', window.Echo);
 
-        // Debugging: Log window.Echo to ensure it's initialized
-        console.log('Echo instance:', window.Echo);
+            if (typeof window.Echo !== 'undefined') {
+                window.Echo.private(`user.${currentUserId}`)
+                    .listen('.ChatMessageSent', (data) => {
+                        console.log('ChatMessageSent event received:', data);
+                        const conversationId = data.conversation_id || (data.message && data.message.conversation_id);
+                        if (!conversationId) return;
 
-        // Listen for real-time events on the user's private channel
-        if (typeof window.Echo !== 'undefined') {
-            window.Echo.private(`user.${currentUserId}`)
-                .listen('.ChatMessageSent', (data) => {
-                    console.log('ChatMessageSent event received:', data);
-                    
-                    // Extract conversation ID - handle both direct and nested structures
-                    const conversationId = data.conversation_id || (data.message && data.message.conversation_id);
-                    if (!conversationId) {
-                        console.error('No conversation_id found in event data');
-                        return;
-                    }
-                    
-                    // Extract receiver ID - handle both direct and nested structures
-                    const receiverId = data.receiver_id || (data.message && data.message.receiver_id);
-                    
-                    // Extract message content - handle both direct and nested structures
-                    const messageContent = data.message;
-                    const messageCreatedAt = data.created_at || (data.message && data.message.created_at);
-                    
-                    // Create message object for processing
-                    const message = {
-                        content: messageContent,
-                        created_at: messageCreatedAt,
-                        conversation_id: conversationId,
-                        receiver_id: receiverId
-                    };
+                        const receiverId = data.receiver_id || (data.message && data.message.receiver_id);
+                        const messageContent = data.message?.content || data.content;
+                        const messageCreatedAt = data.created_at || (data.message && data.message.created_at);
 
-                    // Check if this is a message in one of our conversations
-                    const conversationCard = document.querySelector(`.conversation-card[data-conversation-id="${conversationId}"]`);
-                    if (!conversationCard) {
-                        console.error('Conversation card not found for ID:', conversationId);
-                        return;
-                    }
-                    
-                    // Update unread count if message is for current user
-                    if (receiverId == currentUserId) {
-                        updateUnreadCount(conversationId, 1);
-                    }
-                    
-                    // Update latest message for this conversation
-                    updateLatestMessage(conversationId, message);
-                    
-                    // Update last updated time
-                    updateLastUpdated(conversationId);
-                });
-        }
+                        const conversationCard = document.querySelector(
+                            `.conversation-card[data-conversation-id="${conversationId}"]`
+                        );
+                        if (!conversationCard) return;
 
-        // Function to update unread message count for a conversation
-        function updateUnreadCount(conversationId, change) {
-            const conversationCard = document.querySelector(`.conversation-card[data-conversation-id="${conversationId}"]`);
-            if (!conversationCard) return;
-
-            let unreadBadge = conversationCard.querySelector('.unread-count');
-            let currentCount = unreadBadge ? parseInt(unreadBadge.innerText) || 0 : 0;
-            let newCount = Math.max(0, currentCount + change);
-
-            if (newCount > 0) {
-                if (!unreadBadge) {
-                    // Create new badge if it doesn't exist
-                    const userSpan = conversationCard.querySelector('.conversation-user');
-                    unreadBadge = document.createElement('span');
-                    unreadBadge.className = 'unread-count';
-                    unreadBadge.id = `unread-count-${conversationId}`;
-                    unreadBadge.innerText = newCount;
-                    userSpan.appendChild(unreadBadge);
-                } else {
-                    unreadBadge.innerText = newCount;
-                }
-            } else if (unreadBadge) {
-                unreadBadge.remove();
-            }
-        }
-
-        // Function to update latest message preview
-        function updateLatestMessage(conversationId, message) {
-            const conversationCard = document.querySelector(`.conversation-card[data-conversation-id="${conversationId}"]`);
-            if (!conversationCard) return;
-
-            let latestMessageDiv = conversationCard.querySelector('.latest-message');
-            const messageDate = new Date(message.created_at);
-            const formattedDate = messageDate.toLocaleString('default', { 
-                month: 'short', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-
-            if (!latestMessageDiv) {
-                // Create new message div if it doesn't exist
-                const conversationBody = conversationCard.querySelector('.conversation-body');
-                latestMessageDiv = document.createElement('div');
-                latestMessageDiv.className = 'latest-message';
-                latestMessageDiv.id = `latest-message-${conversationId}`;
-                conversationBody.appendChild(latestMessageDiv);
-            }
-
-            latestMessageDiv.innerHTML = `
-                <strong>Latest: </strong>
-                <span class="message-preview">${message.content.substring(0, 50)}${message.content.length > 50 ? '...' : ''}</span>
-                <span class="message-time" style="float: right; color: var(--light-black);">
-                    ${formattedDate}
-                </span>
-            `;
-        }
-
-        // Function to update last updated time
-        function updateLastUpdated(conversationId) {
-            const lastUpdatedSpan = document.querySelector(`#last-updated-${conversationId}`);
-            if (lastUpdatedSpan) {
-                lastUpdatedSpan.innerText = 'Just now';
-            }
-        }
-
-        // Handle marking messages as read when conversation is opened
-        $(document).ready(function() {
-            $('.conversation-header a').on('click', function(e) {
-                const conversationId = $(this).closest('.conversation-card').data('conversation-id');
-                $.ajax({
-                    url: '/mark-messages-as-read',
-                    method: 'POST',
-                    data: {
-                        conversation_id: conversationId,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            $(`#unread-count-${conversationId}`).remove();
+                        if (receiverId == currentUserId) {
+                            updateUnreadCount(conversationId, 1);
                         }
-                    },
-                    error: function(error) {
-                        console.error('Error marking messages as read:', error);
+
+                        const message = {
+                            content: messageContent,
+                            created_at: messageCreatedAt
+                        };
+
+                        updateLatestMessage(conversationId, message);
+                        updateLastUpdated(conversationId);
+                    });
+            }
+
+            function updateUnreadCount(conversationId, change) {
+                const conversationCard = document.querySelector(
+                    `.conversation-card[data-conversation-id="${conversationId}"]`);
+                if (!conversationCard) return;
+
+                let unreadBadge = conversationCard.querySelector(`#unread-count-${conversationId}`);
+                let currentCount = unreadBadge ? parseInt(unreadBadge.innerText) || 0 : 0;
+                let newCount = Math.max(0, currentCount + change);
+
+                if (newCount > 0) {
+                    if (!unreadBadge) {
+                        const userSpan = conversationCard.querySelector('.conversation-user');
+                        unreadBadge = document.createElement('span');
+                        unreadBadge.className = 'unread-count';
+                        unreadBadge.id = `unread-count-${conversationId}`;
+                        unreadBadge.innerText = newCount;
+                        userSpan.appendChild(unreadBadge);
+                    } else {
+                        unreadBadge.innerText = newCount;
                     }
+                } else if (unreadBadge) {
+                    unreadBadge.remove();
+                }
+            }
+
+            function updateLatestMessage(conversationId, message) {
+                const conversationCard = document.querySelector(
+                    `.conversation-card[data-conversation-id="${conversationId}"]`);
+                if (!conversationCard) return;
+
+                let latestMessageDiv = conversationCard.querySelector(`#latest-message-${conversationId}`);
+                const messageDate = new Date(message.created_at);
+                const formattedDate = messageDate.toLocaleString('default', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                if (!latestMessageDiv) {
+                    const conversationBody = conversationCard.querySelector('.conversation-body');
+                    latestMessageDiv = document.createElement('div');
+                    latestMessageDiv.className = 'latest-message';
+                    latestMessageDiv.id = `latest-message-${conversationId}`;
+                    conversationBody.appendChild(latestMessageDiv);
+                }
+
+                latestMessageDiv.innerHTML = `
+                    <strong>Latest: </strong>
+                    <span class="message-preview">${message.content.substring(0, 50)}${message.content.length > 50 ? '...' : ''}</span>
+                    <span class="message-time" style="float: right; color: var(--light-black);">
+                        ${formattedDate}
+                    </span>
+                `;
+            }
+
+            function updateLastUpdated(conversationId) {
+                const lastUpdatedSpan = document.querySelector(`#last-updated-${conversationId}`);
+                if (lastUpdatedSpan) {
+                    lastUpdatedSpan.innerText = 'Just now';
+                }
+            }
+
+            $(document).ready(function () {
+                $('.conversation-header a').on('click', function (e) {
+                    const conversationCard = $(this).closest('.conversation-card');
+                    const conversationId = conversationCard.data('conversation-id');
+
+                    $.ajax({
+                        url: '/mark-read',
+                        method: 'POST',
+                        data: {
+                            conversation_id: conversationId,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                conversationCard.find(`#unread-count-${conversationId}`).remove();
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error marking messages as read:', error);
+                        }
+                    });
                 });
             });
         });
-    });
     </script>
 </body>
 </html>

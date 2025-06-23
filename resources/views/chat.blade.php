@@ -313,6 +313,7 @@ $(document).ready(function () {
             },
             error: function (error) {
                 console.error('Error marking messages as read:', error);
+                
             }
         });
     });

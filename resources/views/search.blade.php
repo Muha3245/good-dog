@@ -225,6 +225,14 @@
         color: var(--text-light);
         font-size: 0.9rem;
     }
+
+    .unread-count-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        font-size: 0.7rem;
+        padding: 0.25em 0.4em;
+    }
 </style>
 
 <nav class="navbar navbar-expand-lg sticky-top">
@@ -269,6 +277,7 @@
                                     <p class="puppy-result-meta">{{ $puppy->breed }} • {{ $puppy->gender }} •
                                         ${{ number_format($puppy->price) }}</p>
                                 </div>
+
                             </div>
                         @endforeach
                     </div>
@@ -292,10 +301,16 @@
         <div class="user-dropdown">
             <div class="user-menu" id="accountArea">
                 @auth
-                    <img src="{{ auth()->user()->avatar
-                        ? asset('storage/avatars/' . auth()->user()->avatar)
-                        : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}"
-                        class="user-avatar" alt="User Avatar">
+                    <div style="position: relative;">
+                        <img src="{{ auth()->user()->avatar
+                            ? asset('storage/avatars/' . auth()->user()->avatar)
+                            : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}"
+                            class="user-avatar" alt="User Avatar">
+                        <span id="nav-unread-count" class="badge bg-danger unread-count-badge"
+                            style="{{ auth()->user()->receivedMessages()->where('is_read', false)->count() > 0 ? '' : 'display: none;' }}">
+                            {{ auth()->user()->receivedMessages()->where('is_read', false)->count() }}
+                        </span>
+                    </div>
                     <span>{{ auth()->user()->name }}</span>
                 @else
                     <i class="fas fa-user-circle user-avatar"></i>
@@ -311,14 +326,6 @@
                         </a>
                     @endif
 
-                    {{-- Add more role-based menu items here if needed --}}
-                    {{-- Example for dog-shelter --}}
-                    {{-- @if (auth()->user()->role === 'shelter')
-                        <a href="{{ route('dog-shelters.index') }}" class="dropdown-item">
-                            <i class="fas fa-home me-2"></i> Shelter Profile
-                        </a>
-                    @endif --}}
-
                     <div class="dropdown-divider"></div>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         @csrf
@@ -329,8 +336,13 @@
                     </a>
                     
                     @if (auth()->user()->role === 'user')
-                        <a href="{{ route('users.message', ['id' => auth()->user()->id]) }}" class="dropdown-item">Your
-                            Messages</a>
+                        <a href="{{ route('users.message', ['id' => auth()->user()->id]) }}" class="dropdown-item">
+                            <i class="fas fa-envelope me-2"></i> Your Messages
+                            <span id="dropdown-unread-count" class="badge bg-danger ms-2"
+                                style="{{ auth()->user()->receivedMessages()->where('is_read', false)->count() > 0 ? '' : 'display: none;' }}">
+                                {{ auth()->user()->receivedMessages()->where('is_read', false)->count() }}
+                            </span>
+                        </a>
                     @endif
                 @else
                     <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#loginModal">
@@ -339,15 +351,11 @@
                     <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#breederModal">
                         <i class="fas fa-user-plus me-2"></i> Register as user
                     </a>
-
                 @endauth
             </div>
         </div>
-
     </div>
 </nav>
-
-<!-- Your modals remain exactly the same -->
 
 <!-- Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -381,9 +389,6 @@
                             <i class="fas fa-user-plus me-1"></i>Register
                         </a> first.
                     </p>
-
-
-
                 </form>
             </div>
         </div>
@@ -504,6 +509,36 @@
     </div>
 </div>
 
+@vite(['resources/js/app.js'])
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const currentUserId = {{ auth()->id() ?? 'null' }};
+        
+        // Only initialize Echo if user is logged in
+        if (currentUserId && typeof window.Echo !== 'undefined') {
+            const navUnreadBadge = document.getElementById('nav-unread-count');
+            const dropdownUnreadBadge = document.getElementById('dropdown-unread-count');
+            
+            window.Echo.private(`user.${currentUserId}`)
+                .listen('.ChatMessageSent', (e) => {
+                    // Update both unread badges
+                    [navUnreadBadge, dropdownUnreadBadge].forEach(badge => {
+                        if (badge) {
+                            let currentCount = parseInt(badge.innerText) || 0;
+                            let newCount = currentCount + 1;
+                            
+                            badge.innerText = newCount;
+                            badge.style.display = '';
+                        }
+                    });
+                });
+        }
+    });
+</script>
 <script>
     window.puppyData = {
         all: @json($allPuppies),

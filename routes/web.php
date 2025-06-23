@@ -182,5 +182,6 @@ Route::prefix('chat')->middleware(['auth'])->group(function() {
     Route::post('/conversations', [ChatController::class, 'storeconversations'])->name('conversation.store');
 });
 // In web.php
-Route::post('/mark-messages-as-read', [ChatController::class, 'markMessagesAsRead'])->name('mark.messages.as.read');
+Route::post('/mark-messages-as-read', [ChatController::class, 'markMessagesAsRead'])->name('mark-messages-as-read');
+Route::post('/mark-read', [ChatController::class, 'markMessagesRead'])->name('mark.messages.read');
 

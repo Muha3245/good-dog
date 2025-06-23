@@ -18,7 +18,7 @@ class BreederProfileController extends Controller
      */
     public function index()
     {
-        $breeders = BreederProfile::with('user', 'categories')
+        $breeders = BreederProfile::with('user', 'category')
             ->paginate(10);
 
         return view('breeders.index', compact('breeders'));

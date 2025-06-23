@@ -24,8 +24,9 @@ class ChatController extends Controller
             ->where('user_id', '!=', auth()->id())
             ->latest()
             ->get();
+        $userIds = $submissions->pluck('user_id')->unique();
         $conversations=Conversation::get();
-        $users = User::where('id', '!=', auth()->id())->get();
+        $users = User::where('id', '=', $userIds)->get();
         
         return view('chat', [
             'users' => $users,
@@ -44,6 +45,8 @@ class ChatController extends Controller
             ->with(['user', 'breeder.user', 'puppy'])
             ->orderBy('last_message_at', 'desc')
             ->get();
+            
+            
 
         return view('chatsshow', compact('conversations'));
     }
@@ -82,27 +85,53 @@ class ChatController extends Controller
     public function send(Request $request)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'nullable|string',
             'receiver_id' => 'required|exists:users,id',
+                'file' => [
+                    'nullable',
+                    'file',
+                    'mimetypes:image/jpeg,image/png,image/gif,image/webp,application/pdf,video/mp4,video/quicktime,video/x-msvideo,video/x-ms-wmv,video/x-flv,audio/mpeg,audio/wav,audio/aac',
+                    'max:40480', // 20 MB
+                ],
             'conversation_id' => 'nullable|exists:conversations,id'
         ]);
-    
+
+        $filePath = null;
+        $fileName = null;
+        $fileType = null;
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $filename = 'chat_' . time() . '_' . $file->getClientOriginalName();
+            $destination = public_path('uploads/chat/files');
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+            $file->move($destination, $filename);
+            $filePath = 'uploads/chat/files/' . $filename;
+            $fileName = $file->getClientOriginalName();
+            $fileType = $file->getClientMimeType();
+        }
+
         $message = ChatMessage::create([
             'conversation_id' => $request->conversation_id,
             'sender_id' => auth()->id(),
             'receiver_id' => $request->receiver_id,
-            'message' => $request->message
-        ]); // Eager load relationships
-        // Broadcast the event to all participants
-        broadcast(new ChatMessageSent($message))->toOthers();
-    
+            'message' => $request->message,
+            'file_path' => $filePath,
+            'file_name' => $fileName,
+            'file_type' => $fileType,
+        ]);
+
+        broadcast(new ChatMessageSent($message->load('sender', 'receiver')))->toOthers();
+
         if ($request->wantsJson()) {
             return response()->json([
                 'status' => 'success',
                 'message' => $message
             ]);
         }
-    
+
         return redirect()->back()->with('success', 'Message sent!');
     }
 
@@ -168,6 +197,23 @@ public function markMessagesAsRead(Request $request)
                 broadcast(new ChatMessageRead($message))->toOthers();
             }
         }
+
+    return response()->json(['success' => true]);
+}
+
+public function markMessagesRead(Request $request)
+{
+    $request->validate([
+        'conversation_id' => 'required|exists:conversations,id',
+    ]);
+
+    ChatMessage::where('conversation_id', $request->input('conversation_id'))
+        ->where('receiver_id', auth()->id())
+        ->where('is_read', 0)
+        ->update([
+            'is_read' => 1,
+            'read_at' => now(), // This sets the current timestamp
+        ]);
 
     return response()->json(['success' => true]);
 }

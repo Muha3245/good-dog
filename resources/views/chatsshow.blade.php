@@ -14,218 +14,277 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #075e54;
-            --secondary-color: #128c7e;
-            --sent-message-color: #dcf8c6;
-            --received-message-color: #ffffff;
-            --background-color: #e5ddd5;
-            --text-color: #333333;
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            background-color: var(--background-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            margin: 0;
+            min-height: 100vh;
+            min-width: 100vw;
+            background: linear-gradient(135deg, #a7bfe8 0%, #f5f7fa 100%);
         }
 
-        .chat-container {
+        .main-chat-wrapper {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: row;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .chat-sidebar {
+            width: 320px;
+            background: #6366f1;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e2e2e2;
+            padding: 1.5rem 1rem 1rem 1rem;
+        }
+
+        .chat-sidebar .sidebar-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .chat-sidebar .sidebar-user {
+            padding: 0.75rem 0.5rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chat-sidebar .sidebar-user.active,
+        .chat-sidebar .sidebar-user:hover {
+            background: #818cf8;
+        }
+
+        .chat-main {
+            flex: 1 1 auto;
             display: flex;
             flex-direction: column;
             height: 100vh;
-            width: 100%;
-            background-color: white;
+            background: #f4f6fb;
         }
 
         .chat-header {
-            background-color: black;
-            color: white;
-            padding: 15px 20px;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid #e2e2e2;
+            background: #fff;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            gap: 1rem;
+            min-height: 70px;
         }
 
         .chat-header .back-button {
-            color: white;
-            font-size: 1.2rem;
-            margin-right: 15px;
+            color: #6366f1;
+            font-size: 1.3rem;
             text-decoration: none;
-            cursor: pointer;
+        }
+
+        .chat-header .back-button:hover {
+            color: #4338ca;
+        }
+
+        .chat-header h1 {
+            font-size: 1.3rem;
+            margin: 0;
+            font-weight: 600;
+            color: #6366f1;
         }
 
         .messages-container {
-            flex: 1;
+            flex: 1 1 auto;
             overflow-y: auto;
-            padding: 15px;
-            background-color: rgb(247, 246, 246);
+            padding: 2rem 0;
+            background: url('https://www.transparenttextures.com/patterns/symphony.png');
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .message-container {
             display: flex;
             flex-direction: column;
-            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+
+        .sent-message,
+        .received-message {
+            padding: 0.75rem 1.25rem;
+            border-radius: 18px;
+            max-width: 60vw;
+            word-break: break-word;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.07);
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
         }
 
         .sent-message {
-            background-color: var(--sent-message-color);
-            color: var(--text-color);
-            border-radius: 18px 18px 0 18px;
-            padding: 10px 15px;
-            margin-left: auto;
-            max-width: 75%;
-            position: relative;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            color: #fff;
+            align-self: flex-end;
         }
 
         .received-message {
-            background-color: var(--received-message-color);
-            border-radius: 18px 18px 18px 0;
-            padding: 10px 15px;
-            margin-right: auto;
-            max-width: 75%;
-            position: relative;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-        }
-
-        .message-time {
-            display: block;
-            text-align: right;
-            font-size: 0.75rem;
-            color: #667781;
-            margin-top: 5px;
+            background: #fff;
+            color: #334155;
+            align-self: flex-start;
         }
 
         .message-sender {
-            font-size: 0.8rem;
-            color: var(--primary-color);
-            margin-bottom: 3px;
+            font-size: 0.9rem;
+            color: #6366f1;
+            margin-bottom: 2px;
             font-weight: 500;
         }
 
-        .input-container {
-            background-color: #f0f0f0;
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
-            position: sticky;
-            bottom: 0;
-        }
-
-        .message-input {
-            flex: 1;
-            border-radius: 20px;
-            padding: 10px 15px;
-            border: none;
-            outline: none;
-            background-color: white;
-            margin-right: 10px;
-        }
-
-        .send-button {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background-color: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .send-button:hover {
-            background-color: var(--secondary-color);
-        }
-
-        /* Search Header Styles */
-        .search-header {
-            display: none;
-            /* Hidden by default */
-            background-color: black;
-            color: white;
-            padding: 10px 15px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            align-items: center;
-        }
-
-        .search-header .back-button {
-            color: white;
-            font-size: 1.2rem;
-            margin-right: 15px;
-            text-decoration: none;
-        }
-
-        .search-header input {
-            flex: 1;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 20px;
-            outline: none;
-            font-size: 1rem;
-            background-color: white;
-            color: var(--text-color);
-        }
-
-        .search-header .search-controls {
-            display: flex;
-            align-items: center;
-            margin-left: 10px;
-            color: white;
-        }
-
-        .search-header .search-controls .match-count {
+        .message-time {
             font-size: 0.8rem;
-            margin: 0 10px;
+            color: #a5b4fc;
+            margin-left: 10px;
         }
 
-        .search-header .search-controls button {
-            background: none;
+        .input-container {
+            border-top: 1px solid #e2e2e2;
+            background: #fff;
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-control,
+        .btn {
+            border-radius: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
             border: none;
-            color: white;
-            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+        }
+
+        .message-container img {
+            border-radius: 10px;
+            margin-top: 0.5rem;
             cursor: pointer;
-            padding: 5px;
+            transition: box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.07);
         }
 
-        .search-header .search-controls button:disabled {
-            opacity: 0.5;
-            cursor: default;
+        .message-container img:hover {
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.18);
         }
 
-        .highlight {
-            background-color: yellow;
-            font-weight: bold;
+        .message-video video {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            background-color: #000;
+            display: block;
         }
 
-        .hidden {
-            display: none !important;
+        .file-preview-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        @media (max-width: 576px) {
+        .file-preview-wrapper img,
+        .file-preview-wrapper video {
+            max-width: 120px;
+            max-height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .file-preview-wrapper .btn-danger {
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            line-height: 1;
+        }
+
+        @media (max-width: 900px) {
+            .chat-sidebar {
+                display: none;
+            }
+
+            .chat-main {
+                width: 100vw;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .chat-header,
+            .input-container {
+                padding: 1rem;
+            }
+
+            .messages-container {
+                padding: 1rem 0;
+            }
 
             .sent-message,
             .received-message {
-                max-width: 85%;
+                max-width: 90vw;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="chat-container">
-        <!-- Chat Header -->
-        <div class="chat-header" id="chat-header">
-            <div class="d-flex align-items-center">
+    <div class="main-chat-wrapper">
+        <!-- Sidebar (optional, can be removed if you want only chat) -->
+        {{-- <div class="chat-sidebar d-none d-md-flex flex-column">
+            <div class="sidebar-header">
+                <i class="fas fa-comments me-2"></i>Chats
+            </div> --}}
+        {{-- <div class="sidebar-user active">
+                
+                @if (auth()->user()->isBreeder())
+                @foreach ($user as $us)
+                <i class="fas fa-user-circle me-2"></i>
+                    {{ $us->name }}
+                @endforeach
+                    
+                @else
+                    Admin
+                @endif
+            </div> --}}
+        {{-- <div class="sidebar-user-list">
+                @if (auth()->user()->isBreeder())
+                    @foreach ($user as $us)
+                        @if ($us->id !== auth()->id())
+                            <a href="#" class="sidebar-user {{ isset($receiver) && $receiver->id == $us->id ? 'active' : '' }}">
+                                <i class="fas fa-user-circle me-2"></i>
+                                {{ $us->name }}
+                            </a>
+                        @endif
+                    @endforeach
+                @else
+                    <div class="sidebar-user active">
+                        <i class="fas fa-user-circle me-2"></i>
+                        Davepoodles
+                    </div>
+                @endif
+            </div> --}}
+        <!-- Add more users/conversations here if needed -->
+        {{-- </div> --}}
+        <!-- Chat Main Area -->
+        <div class="chat-main">
+            <!-- Chat Header -->
+            <div class="chat-header">
                 @auth
                     @if (auth()->user()->isBreeder())
                         <a href="{{ route('dashboard') }}" class="back-button" aria-label="Back to dashboard">
@@ -241,302 +300,314 @@
                         <i class="fas fa-arrow-left"></i>
                     </a>
                 @endauth
-                <h1 class="h5 mb-0">
+                <h1 class="mb-0 ms-2">
                     @if (auth()->user()->isBreeder())
                         {{ $receiver->name }}
                     @else
-                        Admin
+                        Davepoodles
                     @endif
                 </h1>
-
             </div>
-            <div class="search-icon">
-                <i class="fas fa-search" id="search-icon" aria-label="Open search" style="cursor: pointer"></i>
-            </div>
-        </div>
-        <!-- Search Header (replaces chat header when searching) -->
-        <div class="search-header" id="search-header">
-            <a href="#" class="back-button" id="close-search" aria-label="Close search">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <input type="text" id="search-input" placeholder="Search messages..." aria-label="Search messages">
-            <div class="search-controls">
-                <button id="prev-match" aria-label="Previous match" disabled>
-                    <i class="fas fa-chevron-up"></i>
-                </button>
-                <span class="match-count" id="match-count">0/0</span>
-                <button id="next-match" aria-label="Next match" disabled>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-            </div>
-        </div>
-        <!-- Messages Container -->
-        <div class="messages-container" id="messages-container">
-            @foreach ($messages as $message)
-                <div class="message-container" data-message-id="{{ $message->id }}">
-                    @if ($message->sender_id != Auth::id())
-                        <div class="message-sender">
-                            {{ $message->sender_id == $receiver->id ? $receiver->name : 'Unknown' }}</div>
-                    @endif
-                    <div class="{{ $message->sender_id == Auth::id() ? 'sent-message' : 'received-message' }}">
-                        <div class="message-text">{{ $message->message }}</div>
-                        <span class="message-time">
-                            {{ $message->created_at->format('h:i A') }}
-                            @if ($message->sender_id == Auth::id())
-                                <i class="fas fa-check-double ms-1"></i>
+            <!-- Messages Container -->
+            <div class="messages-container" id="messages-container">
+                @foreach ($messages as $message)
+                    <div class="message-container" data-message-id="{{ $message->id }}">
+                        @if ($message->sender_id != Auth::id())
+                            <div class="message-sender">
+                                {{ $message->sender_id == $receiver->id ? $receiver->name : 'Unknown' }}
+                            </div>
+                        @endif
+                        <div class="{{ $message->sender_id == Auth::id() ? 'sent-message' : 'received-message' }}">
+                            @if ($message->message)
+                                <div class="message-text">{{ $message->message }}</div>
                             @endif
-                        </span>
+                            @if ($message->file_path && Str::startsWith($message->file_type, 'image/'))
+                                <div>
+                                    <a href="{{ asset($message->file_path) }}" target="_blank">
+                                        <img src="{{ asset($message->file_path) }}" alt="Image"
+                                            style="max-width:220px;max-height:220px;">
+                                    </a>
+                                </div>
+                            @endif
+                            @if ($message->file_path && Str::startsWith($message->file_type, 'application/'))
+                                <div>
+                                    <a href="{{ asset($message->file_path) }}" target="_blank">
+                                        <i class="fas fa-file-alt"></i> {{ $message->file_name ?? 'Document' }}
+                                    </a>
+                                </div>
+                            @endif
+                            @if ($message->file_path && Str::startsWith($message->file_type, 'video/'))
+                                <div class="message-video mt-2">
+                                    <video controls width="220" height="150"
+                                        style="max-width: 100%; border-radius: 8px;">
+                                        <source src="{{ asset($message->file_path) }}"
+                                            type="{{ $message->file_type }}">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            @endif
+                            <span class="message-time">
+                                {{ $message->created_at->format('h:i A') }}
+                                @if ($message->sender_id == Auth::id())
+                                    <i class="fas fa-check-double ms-1"></i>
+                                @endif
+                            </span>
+                        </div>
                     </div>
-                </div>
-            @endforeach
-        </div>
-        <!-- Input Container -->
-        <div class="input-container">
-            <form id="message-form" method="POST" action="{{ route('chat.send') }}"
-                class="d-flex w-100 align-items-center">
-                @csrf
-                <input type="hidden" name="receiver_id" value="{{ $receiver->id }}">
-                <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
-                <input type="text" name="message" id="message-input" class="message-input"
-                    placeholder="Type a message" aria-label="Type your message" required>
-                <button type="submit" id="send-btn" class="send-button" aria-label="Send message">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
+                @endforeach
+            </div>
+            <!-- Input Container -->
+            <div class="input-container">
+                <form id="message-form" method="POST" action="{{ route('chat.send') }}"
+                    class="flex-grow-1 d-flex align-items-center" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="receiver_id" value="{{ $receiver->id }}">
+                    <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
+                    <input type="text" name="message" id="message-input" class="form-control me-2"
+                        placeholder="Type a message" aria-label="Type your message">
+                    <input type="file" name="file" id="file-input"
+                        accept="
+                                image/*,
+                                video/mp4,
+                                video/webm,
+                                video/ogg,
+                                application/pdf,
+                                application/msword,
+                                application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                application/vnd.ms-excel,
+                                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+                            "
+                        style="display:none;">
+                    <div id="file-preview-container" class="d-flex align-items-center mt-2" style="display: none;">
+                    </div>
+
+                    <button type="button" class="btn btn-light me-2" id="attach-btn" title="Attach file">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <button type="submit" id="send-btn" class="btn btn-primary" aria-label="Send message">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+                <!-- File Preview Container -->
+                {{-- <img id="image-preview" src="" alt="Image Preview"
+                    style="display:none;max-width:120px;max-height:120px;margin-left:10px;">
+                <span id="file-name-preview" style="display:none;margin-left:10px;"></span> --}}
+            </div>
         </div>
     </div>
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    @vite(['resources/js/app.js'])
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const conversationId = {{ $conversation->id }};
-            const currentUserId = {{ Auth::id() }};
-            const receiverId = {{ $receiver->id }};
-            const messagesContainer = document.getElementById('messages-container');
-            const messageForm = document.getElementById('message-form');
-            const chatHeader = document.getElementById('chat-header');
-            const searchHeader = document.getElementById('search-header');
-            const searchInput = document.getElementById('search-input');
-            const searchIcon = document.getElementById('search-icon');
-            const closeSearch = document.getElementById('close-search');
-            const prevMatchButton = document.getElementById('prev-match');
-            const nextMatchButton = document.getElementById('next-match');
-            const matchCount = document.getElementById('match-count');
-            let currentMatchIndex = -1;
-            let highlightedElements = [];
+        $(document).ready(function() {
+            const $fileInput = $('#file-input');
+            const $fileNamePreview = $('#file-name-preview');
+            const $imagePreview = $('#image-preview');
+            const $filePreviewContainer = $('#file-preview-container');
 
-            // Back button functionality
-            // const backButton = document.getElementById('back-button');
-            // backButton.addEventListener('click', function(e) {
-            //     e.preventDefault();
-            //     window.history.back(); // Navigate to the previous page
-            // });
+            // Trigger file input when attach button is clicked
+            $('#attach-btn').on('click', function() {
+                $fileInput.click();
+            });
 
-            // Subscribe to conversation channel only
-            window.Echo.channel(`conversation.${conversationId}`)
-                .listen('.ChatMessageSent', (data) => handleIncomingMessage(data));
+            // Handle file selection
+            $fileInput.on('change', function(e) {
+                const file = e.target.files[0];
+                $filePreviewContainer.empty().hide();
 
-            function handleIncomingMessage(data) {
-                const participants = [currentUserId, receiverId].sort();
-                const messageParticipants = [data.sender_id, data.receiver_id].sort();
-                if (participants[0] !== messageParticipants[0] || participants[1] !== messageParticipants[1]) {
-                    console.log('Message not between these users');
-                    return;
+                if (!file) return;
+
+                const fileName = file.name;
+                const fileType = file.type;
+
+                const removeIcon = `
+                <button type="button" id="remove-file" class="btn btn-sm btn-danger ms-2" title="Remove file">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+                // Image Preview
+                if (fileType.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        const html = `
+                        <img src="${ev.target.result}" alt="Image Preview" id="image-preview"
+                            style="max-width:120px; max-height:120px; border-radius: 8px;">
+                        ${removeIcon}
+                    `;
+                        $filePreviewContainer.html(html).show();
+                    };
+                    reader.readAsDataURL(file);
                 }
-
-                appendMessage(data);
-                scrollToBottom();
-            }
-
-            function appendMessage(message) {
-                const isCurrentUser = message.sender_id == currentUserId;
-                const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
-                if (existingMessage) {
-                    return; // Do not append duplicate messages
-                }
-
-                const messageClass = isCurrentUser ? 'sent-message' : 'received-message';
-                const senderName = isCurrentUser ? 'You' : message.sender.name;
-
-                const messageElement = document.createElement('div');
-                messageElement.className = 'message-container';
-                messageElement.setAttribute('data-message-id', message.id); // Unique identifier
-                messageElement.innerHTML = `
-                    ${!isCurrentUser ? `<div class="message-sender">${senderName}</div>` : ''}
-                    <div class="${messageClass}">
-                        <div class="message-text">${message.message}</div>
-                        <span class="message-time">
-                            ${new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            ${isCurrentUser ? '<i class="fas fa-check-double ms-1"></i>' : ''}
-                        </span>
+                // Video Preview
+                else if (fileType.startsWith('video/')) {
+                    const videoURL = URL.createObjectURL(file);
+                    const html = `
+                    <div class="position-relative">
+                        <video controls width="120" height="90" style="border-radius: 8px;">
+                            <source src="${videoURL}" type="${fileType}">
+                            Your browser does not support the video tag.
+                        </video>
+                        ${removeIcon}
                     </div>
                 `;
-                messagesContainer.appendChild(messageElement);
-            }
+                    $filePreviewContainer.html(html).show();
+                }
+                // Document Preview (PDF, Word, Excel)
+                else if (
+                    [
+                        'application/pdf',
+                        'application/msword',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'application/vnd.ms-excel',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    ].includes(fileType)
+                ) {
+                    const icon = fileType.startsWith('application/pdf') ? 'fa-file-pdf' :
+                        fileType.includes('word') ? 'fa-file-word' : 'fa-file-excel';
 
-            function scrollToBottom() {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
+                    const html = `
+                    <div class="d-flex align-items-center bg-light p-2 rounded shadow-sm">
+                        <i class="fas ${icon} fa-2x text-danger"></i>
+                        <span class="ms-2 small">${fileName}</span>
+                        ${removeIcon}
+                    </div>
+                `;
+                    $filePreviewContainer.html(html).show();
+                }
+                // Other file types
+                else {
+                    const html = `
+                    <div class="d-flex align-items-center bg-light p-2 rounded shadow-sm">
+                        <i class="fas fa-file-alt fa-2x text-muted"></i>
+                        <span class="ms-2 small">${fileName}</span>
+                        ${removeIcon}
+                    </div>
+                `;
+                    $filePreviewContainer.html(html).show();
+                }
 
-            // Handle form submission
-            messageForm.addEventListener('submit', function(e) {
-                // e.preventDefault();
-
-                const formData = new FormData(this);
-                const messageInput = this.querySelector('input[name="message"]');
-
-                const tempMessage = {
-                    id: 'temp-' + Date.now(),
-                    conversation_id: conversationId,
-                    sender_id: currentUserId,
-                    receiver_id: receiverId,
-                    message: messageInput.value,
-                    created_at: new Date().toISOString(),
-                    sender: {
-                        id: currentUserId,
-                        name: 'You'
-                    },
-                    is_temp: true
-                };
-
-                appendMessage(tempMessage);
-                scrollToBottom();
-
-                messageInput.value = '';
-
-                fetch(this.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        const tempElement = document.querySelector(
-                            `[data-temp-id="${tempMessage.id}"]`);
-                        if (tempElement && data.message) {
-                            tempElement.remove();
-                            appendMessage(data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        const tempElement = document.querySelector(
-                            `[data-temp-id="${tempMessage.id}"]`);
-                        if (tempElement) {
-                            tempElement.querySelector('.message-text').textContent +=
-                                ' (Failed to send)';
-                            tempElement.querySelector('.message-text').style.color = 'red';
-                        }
-                    });
-            });
-
-            // Initial scroll to bottom
-            scrollToBottom();
-
-            // Search functionality
-            searchIcon.addEventListener('click', function() {
-                chatHeader.style.display = 'none';
-                searchHeader.style.display = 'flex';
-                searchInput.focus();
-            });
-
-            closeSearch.addEventListener('click', function(e) {
-                e.preventDefault();
-                resetSearch();
-            });
-
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase().trim();
-                const messageContainers = document.querySelectorAll('.message-container');
-
-                highlightedElements = [];
-                currentMatchIndex = -1;
-
-                messageContainers.forEach(container => {
-                    const messageText = container.querySelector('.message-text');
-                    const text = messageText.textContent.toLowerCase();
-
-                    if (searchTerm && text.includes(searchTerm)) {
-                        container.classList.remove('hidden');
-                        highlightText(messageText, searchTerm);
-                        highlightedElements.push(container);
-                    } else {
-                        container.classList.add('hidden');
-                        messageText.innerHTML = text; // Reset highlighting
-                    }
+                // Remove file handler
+                $(document).on('click', '#remove-file', function() {
+                    $fileInput.val('');
+                    $filePreviewContainer.hide().empty(); // hide + clear content
                 });
 
-                updateMatchControls();
-
-                if (highlightedElements.length > 0) {
-                    currentMatchIndex = 0;
-                    scrollToMatch(currentMatchIndex);
-                }
             });
 
-            prevMatchButton.addEventListener('click', function() {
-                if (highlightedElements.length === 0) return;
-                currentMatchIndex = (currentMatchIndex - 1 + highlightedElements.length) %
-                    highlightedElements.length;
-                scrollToMatch(currentMatchIndex);
-                updateMatchControls();
+            // Optional: Clear preview on form submit
+            $('#message-form').on('submit', function() {
+                $filePreviewContainer.hide();
             });
-
-            nextMatchButton.addEventListener('click', function() {
-                if (highlightedElements.length === 0) return;
-                currentMatchIndex = (currentMatchIndex + 1) % highlightedElements.length;
-                scrollToMatch(currentMatchIndex);
-                updateMatchControls();
-            });
-
-            function highlightText(element, searchTerm) {
-                const text = element.textContent;
-                const regex = new RegExp(`(${searchTerm})`, 'gi');
-                element.innerHTML = text.replace(regex, '<span class="highlight">$1</span>');
-            }
-
-            function scrollToMatch(index) {
-                if (highlightedElements.length > 0 && index >= 0 && index < highlightedElements.length) {
-                    const targetElement = highlightedElements[index];
-                    messagesContainer.scrollTop = targetElement.offsetTop - messagesContainer.offsetTop - 50;
-                }
-            }
-
-            function updateMatchControls() {
-                if (highlightedElements.length > 0) {
-                    matchCount.textContent = `${currentMatchIndex + 1}/${highlightedElements.length}`;
-                    prevMatchButton.disabled = false;
-                    nextMatchButton.disabled = false;
-                } else {
-                    matchCount.textContent = '0/0';
-                    prevMatchButton.disabled = true;
-                    nextMatchButton.disabled = true;
-                }
-            }
-
-            function resetSearch() {
-                searchHeader.style.display = 'none';
-                chatHeader.style.display = 'flex';
-                searchInput.value = '';
-
-                const messageContainers = document.querySelectorAll('.message-container');
-                messageContainers.forEach(container => {
-                    container.classList.remove('hidden');
-                    const messageText = container.querySelector('.message-text');
-                    messageText.innerHTML = messageText.textContent;
-                });
-
-                highlightedElements = [];
-                currentMatchIndex = -1;
-                updateMatchControls();
-            }
         });
     </script>
+    <script>
+        $(function() {
+            // File preview
+            // $('#attach-btn').on('click', function() {
+            //     $('#file-input').click();
+            // });
+            // $('#file-input').on('change', function(e) {
+            //     const file = e.target.files[0];
+            //     const $imagePreview = $('#image-preview');
+            //     const $fileNamePreview = $('#file-name-preview');
+            //     if (file) {
+            //         if (file.type.startsWith('image/')) {
+            //             const reader = new FileReader();
+            //             reader.onload = function(ev) {
+            //                 $imagePreview.attr('src', ev.target.result).show();
+            //                 $fileNamePreview.hide();
+            //             };
+            //             reader.readAsDataURL(file);
+            //         } else {
+            //             $imagePreview.hide().attr('src', '');
+            //             $fileNamePreview.text(file.name).show();
+            //         }
+            //     } else {
+            //         $imagePreview.hide().attr('src', '');
+            //         $fileNamePreview.hide().text('');
+            //     }
+            // });
+
+            // Real-time message receiving (Laravel Echo)
+            if (typeof window.Echo !== 'undefined') {
+                window.Echo.private('user.' + {{ auth()->id() }})
+                    .listen('.ChatMessageSent', function(message) {
+                        // Prevent duplicate rendering if message already exists
+                        if ($(`[data-message-id="${message.id}"]`).length) return;
+
+                        let fileHtml = '';
+                        if (message.file_path && message.file_type?.startsWith('image/')) {
+                            fileHtml = `
+                    <div>
+                        <a href="/${message.file_path}" target="_blank">
+                            <img src="/${message.file_path}" alt="Image" style="max-width:220px;max-height:220px;">
+                        </a>
+                    </div>
+                `;
+                        } else if (message.file_path && message.file_type?.startsWith('application/')) {
+                            fileHtml = `
+                    <div>
+                        <a href="/${message.file_path}" target="_blank">
+                            <i class="fas fa-file-alt"></i> ${message.file_name || 'Document'}
+                        </a>
+                    </div>
+                `;
+                        } else if (message.file_type?.startsWith('video/')) {
+                            // Video player
+                            fileHtml = `
+            <div class="message-video mt-2">
+                <video controls width="220" height="150" style="max-width: 100%; border-radius: 8px;">
+                    <source src="/${message.file_path}" type="${message.file_type}">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        `;
+                        }
+
+                        const isCurrentUser = message.sender_id == {{ auth()->id() }};
+                        const messageClass = isCurrentUser ? 'sent-message' : 'received-message';
+                        const senderName = isCurrentUser ? 'You' : (message.sender?.name || 'User');
+                        const time = message.created_at ?
+                            new Date(message.created_at).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }) :
+                            '';
+
+                        const html = `
+                ${!isCurrentUser ? `<div class="message-sender">${senderName}</div>` : ''}
+                <div class="${messageClass}">
+                    ${message.message ? `<div class="message-text">${message.message}</div>` : ''}
+                    ${fileHtml}
+                    <span class="message-time">
+                        ${time}
+                        ${isCurrentUser ? '<i class="fas fa-check-double ms-1"></i>' : ''}
+                    </span>
+                </div>
+            `;
+
+                        $('#messages-container').append(
+                            $('<div>')
+                            .addClass('message-container')
+                            .attr('data-message-id', message.id)
+                            .html(html)
+                        );
+
+                        $('#messages-container').scrollTop($('#messages-container')[0].scrollHeight);
+                    });
+            }
+
+
+            // Scroll to bottom on load
+            $('#messages-container').scrollTop($('#messages-container')[0].scrollHeight);
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 
 </html>

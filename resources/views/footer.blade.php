@@ -143,6 +143,9 @@
       <div class="footer-grid">
         <!-- Company Info -->
         <div class="footer-col">
+          <a href="/"><img src="{{ asset('logo.jpeg')}}" alt=""
+          style="width: auto; height: 100px; object-fit: cover; border-radius: 50%; padding:10px;"></a>
+          
           <h3 class="footer-heading">Good Dog</h3>
           <p class="footer-text">Helping you find the perfect dog since 2010.</p>
           <div class="social-links">
@@ -158,9 +161,9 @@
           <h3 class="footer-heading">Quick Links</h3>
           <ul class="footer-links">
             <li><a href="/about">About Us</a></li>
-            <li><a href="/breeders">Find a Breeder</a></li>
-            <li><a href="/dogs">Browse Dogs</a></li>
-            <li><a href="/resources">Resources</a></li>
+            <li><a href="/#">Find a Breeder</a></li>
+            <li><a href="/#">Browse Dogs</a></li>
+            <li><a href="/#">Resources</a></li>
           </ul>
         </div>
   
@@ -169,9 +172,9 @@
           <h3 class="footer-heading">Help</h3>
           <ul class="footer-links">
             <li><a href="/contact">Contact Us</a></li>
-            <li><a href="/faq">FAQ</a></li>
-            <li><a href="/privacy">Privacy Policy</a></li>
-            <li><a href="/terms">Terms of Service</a></li>
+            <li><a href="/#">FAQ</a></li>
+            <li><a href="/#">Privacy Policy</a></li>
+            <li><a href="/#">Terms of Service</a></li>
           </ul>
         </div>
   
@@ -189,11 +192,11 @@
       <!-- Copyright -->
       <div class="footer-bottom">
         <p>&copy; 2023 Good Dog. All rights reserved.</p>
-        <div class="payment-methods">
+        {{-- <div class="payment-methods">
           <img src="/images/visa.png" alt="Visa">
           <img src="/images/mastercard.png" alt="Mastercard">
           <img src="/images/amex.png" alt="American Express">
-        </div>
+        </div> --}}
       </div>
     </div>
   </footer>

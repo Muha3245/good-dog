@@ -44,7 +44,8 @@ class helpers
     }
     public static function user()
     {
-        return Auth::user(); // Laravel's Auth::user() already returns null if not authenticated
+        $users=User::all();
+        return $users; // Laravel's Auth::user() already returns null if not authenticated
     }
     
     public static function isBreeder()
